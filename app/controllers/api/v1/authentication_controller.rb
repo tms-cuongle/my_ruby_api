@@ -1,7 +1,6 @@
 class Api::V1::AuthenticationController < ApplicationController
   skip_before_action :authorize_request, only: [ :login, :register, :forgot_password, :reset_password ]
 
-  # POST /api/v1/auth/login
   def login
     @user = User.find_by(email: params[:email])
 
@@ -15,7 +14,6 @@ class Api::V1::AuthenticationController < ApplicationController
     end
   end
 
-  # POST /api/v1/auth/register
   def register
     @user = User.new(user_params)
 
@@ -30,7 +28,6 @@ class Api::V1::AuthenticationController < ApplicationController
     end
   end
 
-  # DELETE /api/v1/auth/logout
   def logout
     header = request.headers["Authorization"]
     token = header.split(" ").last if header
@@ -39,30 +36,25 @@ class Api::V1::AuthenticationController < ApplicationController
       decoded = JwtService.decode(token)
       TokenBlacklist.create!(jti: decoded[:jti], exp: Time.at(decoded[:exp]))
       render json: { message: "Logged out successfully" }, status: :ok
-    rescue => e
+    rescue StandardError
       render json: { error: "Invalid token" }, status: :unprocessable_entity
     end
   end
 
-  # POST /api/v1/auth/forgot_password
   def forgot_password
     @user = User.find_by(email: params[:email])
 
     if @user
       @user.generate_reset_password_token!
-      # TODO: Send email with reset link in production
-      # UserMailer.reset_password(@user).deliver_later
-
       render json: {
         message: "Reset password instructions sent to your email",
-        reset_token: @user.reset_password_token  # Only for development/testing
+        reset_token: @user.reset_password_token
       }, status: :ok
     else
       render json: { error: "Email not found" }, status: :not_found
     end
   end
 
-  # POST /api/v1/auth/reset_password
   def reset_password
     @user = User.find_by(reset_password_token: params[:token])
 

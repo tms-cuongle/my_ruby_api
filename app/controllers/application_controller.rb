@@ -7,7 +7,6 @@ class ApplicationController < ActionController::API
     begin
       @decoded = JwtService.decode(header)
 
-      # Check if token is blacklisted
       if @decoded && TokenBlacklist.blacklisted?(@decoded[:jti])
         return render json: { error: "Token has been revoked" }, status: :unauthorized
       end

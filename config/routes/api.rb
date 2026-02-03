@@ -1,12 +1,20 @@
 namespace :api do
   namespace :v1 do
-    post "auth/login", to: "authentication#login"
-    post "auth/register", to: "authentication#register"
-    delete "auth/logout", to: "authentication#logout"
-    post "auth/forgot_password", to: "authentication#forgot_password"
-    post "auth/reset_password", to: "authentication#reset_password"
+    controller :authentication do
+      post "auth/login", action: :login
+      post "auth/register", action: :register
+      delete "auth/logout", action: :logout
+      post "auth/forgot_password", action: :forgot_password
+      post "auth/reset_password", action: :reset_password
+    end
 
-    post "uploads", to: "uploads#create"
+    controller :uploads do
+      post "uploads", action: :create
+    end
+
+    controller :users do
+      post "users/avatar", action: :upload_avatar
+    end
     resources :users
   end
 end
